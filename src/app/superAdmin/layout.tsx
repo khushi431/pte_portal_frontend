@@ -2,7 +2,15 @@
 
 import { ReactNode } from "react";
 import { AppLayout } from "@/components/app-layout";
-import { LayoutDashboard, Building2, CreditCard, Settings2, Users } from "lucide-react";
+import {
+    LayoutDashboard,
+    Building2,
+    CreditCard,
+    Settings2,
+    Users,
+    BookOpen,
+    ListChecks,
+} from "lucide-react";
 
 const navGroups = [
     {
@@ -23,6 +31,26 @@ const navGroups = [
                 ],
             },
             { label: "Users", href: "/superAdmin/users", icon: Users },
+        ],
+    },
+    {
+        groupLabel: "Content",
+        items: [
+            {
+                label: "Question Bank",
+                icon: BookOpen,
+                children: [
+                    { label: "All Questions", href: "/superAdmin/questionBank" },
+                    { label: "Add Question", href: "/superAdmin/questionBank/create" },
+                ],
+            },
+            {
+                label: "Question Types",
+                icon: ListChecks,
+                children: [
+                    { label: "All Types", href: "/superAdmin/questionTypes" },
+                ],
+            },
         ],
     },
     {

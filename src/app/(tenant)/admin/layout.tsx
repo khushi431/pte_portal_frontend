@@ -3,7 +3,13 @@
 import { ReactNode } from "react";
 import { AppLayout } from "@/components/app-layout";
 import {
-    LayoutDashboard, GraduationCap, Users, BookOpen, GitBranch, ClipboardList,
+    LayoutDashboard,
+    GraduationCap,
+    Users,
+    BookOpen,
+    GitBranch,
+    ClipboardList,
+    ListChecks,
 } from "lucide-react";
 
 const navGroups = [
@@ -21,7 +27,14 @@ const navGroups = [
                 icon: BookOpen,
                 children: [
                     { label: "All Questions", href: "/admin/questionBank" },
-                    { label: "Add Question", href: "/admin/questionBank/add" },
+                    { label: "Add Question", href: "/admin/questionBank/create" },
+                ],
+            },
+            {
+                label: "Question Types",
+                icon: ListChecks,
+                children: [
+                    { label: "All Types", href: "/admin/questionTypes" },
                 ],
             },
             {

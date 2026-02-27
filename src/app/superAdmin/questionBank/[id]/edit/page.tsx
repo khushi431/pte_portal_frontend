@@ -4,7 +4,7 @@ interface Props {
     params: Promise<{ id: string }>;
 }
 
-export default async function AdminEditQuestionPage({ params }: Props) {
+export default async function SuperAdminEditQuestionPage({ params }: Props) {
     const { id } = await params;
-    return <EditQuestionPage questionId={id} basePath="/admin/questionBank" />;
+    return <EditQuestionPage questionId={id} basePath="/superAdmin/questionBank" />;
 }
