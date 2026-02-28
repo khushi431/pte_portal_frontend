@@ -16,7 +16,7 @@ const navGroups = [
     {
         groupLabel: "Dashboard",
         items: [
-            { label: "Dashboard", href: "/superAdmin/dashboard", icon: LayoutDashboard },
+            { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         ],
     },
     {
@@ -26,11 +26,11 @@ const navGroups = [
                 label: "Tenants",
                 icon: Building2,
                 children: [
-                    { label: "All Tenants", href: "/superAdmin/tenants" },
-                    { label: "Add Tenant", href: "/superAdmin/tenants/new" },
+                    { label: "All Tenants", href: "/tenants" },
+                    { label: "Add Tenant", href: "/tenants/new" },
                 ],
             },
-            { label: "Users", href: "/superAdmin/users", icon: Users },
+            { label: "Users", href: "/users", icon: Users },
         ],
     },
     {
@@ -40,15 +40,15 @@ const navGroups = [
                 label: "Question Bank",
                 icon: BookOpen,
                 children: [
-                    { label: "All Questions", href: "/superAdmin/questionBank" },
-                    { label: "Add Question", href: "/superAdmin/questionBank/create" },
+                    { label: "All Questions", href: "/questionBank" },
+                    { label: "Add Question", href: "/questionBank/create" },
                 ],
             },
             {
                 label: "Question Types",
                 icon: ListChecks,
                 children: [
-                    { label: "All Types", href: "/superAdmin/questionTypes" },
+                    { label: "All Types", href: "/questionTypes" },
                 ],
             },
         ],
@@ -56,13 +56,13 @@ const navGroups = [
     {
         groupLabel: "Finance",
         items: [
-            { label: "Billing", href: "/superAdmin/billing", icon: CreditCard },
+            { label: "Billing", href: "/billing", icon: CreditCard },
         ],
     },
     {
         groupLabel: "System",
         items: [
-            { label: "Settings", href: "/superAdmin/settings", icon: Settings2 },
+            { label: "Settings", href: "/settings", icon: Settings2 },
         ],
     },
 ];

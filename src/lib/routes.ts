@@ -1,11 +1,12 @@
-export type UserRole = "superAdmin" | "admin" | "teacher" | "student" | "platform";
+export type UserRole = "superAdmin" | "admin" | "branchAdmin" | "teacher" | "student" | "platform";
 
 export const ROLE_COOKIE = "role";
 
 /** Role → default dashboard URL */
 export const ROLE_DASHBOARD: Record<UserRole, string> = {
-    superAdmin: "/superAdmin/dashboard",
+    superAdmin: "/dashboard",
     admin: "/admin/dashboard",
+    branchAdmin: "/branch-admin/dashboard",
     teacher: "/teacher/dashboard",
     student: "/student/dashboard",
     platform: "/platform/student",

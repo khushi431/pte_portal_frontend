@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, GraduationCap, Lock, Mail, Shield, BookOpen, Users } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, Lock, Mail, Shield, BookOpen, Users, Building } from "lucide-react";
 import { ROLE_DASHBOARD, UserRole, ROLE_COOKIE } from "@/lib/routes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 const ROLES: { value: UserRole; label: string; icon: React.ElementType; description: string }[] = [
     { value: "superAdmin", label: "Super Admin", icon: Shield, description: "Platform owner" },
     { value: "admin", label: "Admin", icon: Users, description: "Institute admin" },
+    { value: "branchAdmin", label: "Branch Admin", icon: Building, description: "Branch manager" },
     { value: "teacher", label: "Teacher", icon: BookOpen, description: "Educator" },
     { value: "student", label: "Student", icon: GraduationCap, description: "Learner" },
 ];
