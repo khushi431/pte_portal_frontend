@@ -16,14 +16,16 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppTable, AppTableColumn } from "@/components/ui/app-table";
 import { ActionIconButton } from "@/components/ui/action-icon-button";
-import { PteModule, QuestionTypeInfo } from "../types";
+import { PteModule, QuestionTypeInfo, QuestionTypeSlug } from "../types";
 import { PTE_MODULES } from "../constants/modules";
 
 interface QuestionTypeTableProps {
     initialTypes: QuestionTypeInfo[];
 }
 
-type EditableType = Pick<QuestionTypeInfo, "slug" | "label" | "description" | "module">;
+type EditableType = Omit<Pick<QuestionTypeInfo, "slug" | "label" | "description" | "module">, "slug"> & {
+    slug: string;
+};
 
 export function QuestionTypeTable({ initialTypes }: QuestionTypeTableProps) {
     const [types, setTypes] = useState<QuestionTypeInfo[]>(initialTypes);
@@ -82,6 +84,7 @@ export function QuestionTypeTable({ initialTypes }: QuestionTypeTableProps) {
                         ? {
                             ...t,
                             ...editing,
+                            slug: editing.slug as QuestionTypeSlug,
                         }
                         : t,
                 );
@@ -90,6 +93,7 @@ export function QuestionTypeTable({ initialTypes }: QuestionTypeTableProps) {
                 ...prev,
                 {
                     ...editing,
+                    slug: editing.slug as QuestionTypeSlug,
                     // keep internal fields for now but they are not exposed in UI
                     shortLabel: editing.label,
                     icon: "CircleDot",
