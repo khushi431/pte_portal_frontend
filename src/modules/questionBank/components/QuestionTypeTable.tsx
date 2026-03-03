@@ -1,5 +1,4 @@
 "use client";
-
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -187,41 +186,58 @@ export function QuestionTypeTable({ initialTypes }: QuestionTypeTableProps) {
 
     return (
         <div className="space-y-4">
-            {/* Filters + Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-between">
-                <div className="flex-1 max-w-md flex gap-2">
-                    <Input
-                        placeholder="Search by name, slug or description..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                    <select
-                        value={moduleFilter}
-                        onChange={(e) => setModuleFilter(e.target.value as PteModule | "all")}
-                        className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
-                    >
-                        {moduleOptions.map((opt) => (
-                            <option key={opt.id} value={opt.id}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
+            {/* Filters + Table in one card */}
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                {/* Header: search, module filter, actions, summary */}
+                <div className="px-4 py-4 sm:px-5 sm:py-5 space-y-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1 max-w-md flex gap-2">
+                            <Input
+                                placeholder="Search by name, slug or description..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                            <select
+                                value={moduleFilter}
+                                onChange={(e) =>
+                                    setModuleFilter(e.target.value as PteModule | "all")
+                                }
+                                className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
+                                aria-label="Filter by module"
+                            >
+                                {moduleOptions.map((opt) => (
+                                    <option key={opt.id} value={opt.id}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex flex-col items-end gap-1.5">
+                            <Button variant="outline" size="sm" onClick={openCreate}>
+                                <Plus className="size-4" />
+                                Add Question Type
+                            </Button>
+                            <p className="text-[11px] text-slate-500 sm:text-xs">
+                                Showing{" "}
+                                <span className="font-semibold text-slate-700">
+                                    {filtered.length}
+                                </span>{" "}
+                                type{filtered.length !== 1 ? "s" : ""}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex gap-2 justify-end">
-                    <Button variant="outline" size="sm" onClick={openCreate}>
-                        <Plus className="size-4" />
-                        Add Question Type
-                    </Button>
+
+                {/* Table */}
+                <div className="border-t border-slate-100 px-3 pb-4 sm:px-4 sm:pb-5">
+                    <AppTable
+                        data={filtered}
+                        columns={columns}
+                        getRowKey={(qt) => qt.slug}
+                        emptyState="No question types found. Try changing filters or add a new type."
+                    />
                 </div>
             </div>
-
-            {/* Table */}
-            <AppTable
-                data={filtered}
-                columns={columns}
-                getRowKey={(qt) => qt.slug}
-                emptyState="No question types found. Try changing filters or add a new type."
-            />
 
             {/* Create / Edit sheet (dummy, in-memory) */}
             <Sheet open={open} onOpenChange={setOpen}>
@@ -275,6 +291,7 @@ export function QuestionTypeTable({ initialTypes }: QuestionTypeTableProps) {
                                         })
                                     }
                                     className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
+                                    aria-label="Select module for question type"
                                 >
                                     {PTE_MODULES.map((m) => (
                                         <option key={m.id} value={m.id}>

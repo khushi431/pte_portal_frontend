@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ import { QuestionForm } from "../components/QuestionForm";
 import { MCQEditor } from "../editors/mcq/MCQEditor";
 import { FillBlanksEditor } from "../editors/fillBlanks/FillBlanksEditor";
 import { ReadingPassageEditor } from "../editors/reading/ReadingPassageEditor";
+import { WritingEditor } from "../editors/writing/WritingEditor";
+import { ListeningEditor, ListeningEditorProps } from "../editors/listening/ListeningAudioEditor";
+import { SpeakingEditor, SpeakingEditorProps } from "../editors/speaking/SpeakingPromptEditor";
 import { PteModule, QuestionTypeSlug } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +46,7 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
             {/* Top stepper */}
             <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-1 items-center gap-3 sm:gap-4">
+                    <div className="flex flex-1 items-center">
                         {[
                             {
                                 id: 1,
@@ -69,8 +72,9 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                                         : "upcoming";
 
                             return (
-                                <div key={step.id} className="flex flex-1 items-center gap-3">
-                                    <div className="flex items-center gap-2">
+                                <Fragment key={step.id}>
+                                    {/* Step node */}
+                                    <div className="flex shrink-0 items-center gap-2">
                                         <div
                                             className={cn(
                                                 "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors",
@@ -104,9 +108,9 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                                             </p>
                                         </div>
                                     </div>
-                                    {/* Tail connector */}
+                                    {/* Tail connector — equal flex-1 between every step pair */}
                                     {index < arr.length - 1 && (
-                                        <div className="hidden flex-1 items-center sm:flex">
+                                        <div className="hidden flex-1 items-center px-3 sm:flex">
                                             <div
                                                 className={cn(
                                                     "h-[2px] w-full rounded-full",
@@ -117,11 +121,11 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                                             />
                                         </div>
                                     )}
-                                </div>
+                                </Fragment>
                             );
                         })}
                     </div>
-                    <div className="text-[11px] text-slate-400 whitespace-nowrap">
+                    <div className="text-[11px] text-slate-400 whitespace-nowrap sm:ml-4">
                         Step {currentStep} of 3
                     </div>
                 </div>
@@ -186,6 +190,7 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                         (selectedType === "mcq-single" ||
                             selectedType === "mcq-multiple") && (
                             <MCQEditor
+                                key={selectedType}
                                 module={selectedModule as PteModule}
                                 questionType={selectedType}
                             />
@@ -195,6 +200,7 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                         (selectedType === "fill-blanks-drag-drop" ||
                             selectedType === "fill-blanks-reading-writing") && (
                             <FillBlanksEditor
+                                key={selectedType}
                                 module={selectedModule as PteModule}
                                 questionType={selectedType}
                             />
@@ -203,14 +209,48 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                     {selectedModule === "reading" &&
                         selectedType === "reorder-paragraphs" && (
                             <ReadingPassageEditor
+                                key={selectedType}
                                 module={selectedModule as PteModule}
                                 questionType={selectedType}
                             />
                         )}
 
+                    {/* Writing module → specialized editor */}
+                    {selectedModule === "writing" &&
+                        (selectedType === "summarize-written-text" ||
+                            selectedType === "write-essay") && (
+                            <WritingEditor
+                                key={selectedType}
+                                module={selectedModule as PteModule}
+                                questionType={selectedType}
+                            />
+                        )}
+
+                    {/* Listening module → specialized editor */}
+                    {selectedModule === "listening" && (
+                        <ListeningEditor
+                            key={selectedType}
+                            module={selectedModule as PteModule}
+                            questionType={selectedType as ListeningEditorProps["questionType"]}
+                        />
+                    )}
+
+                    {/* Speaking module → specialized editor */}
+                    {selectedModule === "speaking" && (
+                        <SpeakingEditor
+                            key={selectedType}
+                            module={selectedModule as PteModule}
+                            questionType={selectedType as SpeakingEditorProps["questionType"]}
+                        />
+                    )}
+
                     {/* Other modules / types → generic form */}
-                    {selectedModule !== "reading" && (
+                    {selectedModule !== "reading" &&
+                        selectedModule !== "writing" &&
+                        selectedModule !== "listening" &&
+                        selectedModule !== "speaking" && (
                         <QuestionForm
+                            key={`${selectedModule}-${selectedType}`}
                             module={selectedModule as PteModule}
                             questionType={selectedType}
                             basePath={basePath}

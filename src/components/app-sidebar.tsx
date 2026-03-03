@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronDown, ChevronUp, LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Collapsible,
@@ -16,6 +16,14 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface NavChild {
     label: string;
@@ -72,13 +80,67 @@ function NavItemRow({
 
     // Compact icon-only mode for collapsed sidebar (desktop)
     if (collapsed) {
-        const targetHref =
-            item.href ?? item.children?.[0]?.href ?? "#";
+        // Items WITH children → show a flyout submenu to the right
+        if (hasChildren) {
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button
+                            type="button"
+                            title={item.label}
+                            aria-label={item.label}
+                            className={cn(
+                                "flex items-center justify-center rounded-2xl p-3 my-1 w-full transition-colors duration-200",
+                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
+                                isActive
+                                    ? "bg-purple-600 text-white shadow-sm"
+                                    : "text-slate-600 hover:bg-purple-50 hover:text-purple-700"
+                            )}
+                        >
+                            <Icon className="size-5" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        side="right"
+                        align="start"
+                        sideOffset={12}
+                        className="min-w-[180px] p-1.5"
+                    >
+                        <DropdownMenuLabel className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            {item.label}
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator className="my-1" />
+                        {item.children!.map((child) => {
+                            const childActive = pathname === child.href;
+                            return (
+                                <DropdownMenuItem key={child.href} asChild>
+                                    <Link
+                                        href={child.href}
+                                        onClick={onLinkClick}
+                                        className={cn(
+                                            "flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium cursor-pointer transition-colors",
+                                            childActive
+                                                ? "bg-purple-600 text-white focus:bg-purple-700"
+                                                : "text-slate-700 hover:bg-purple-50 hover:text-purple-700 focus:bg-purple-50"
+                                        )}
+                                    >
+                                        <ChevronRight className="size-3.5 shrink-0 opacity-60" />
+                                        {child.label}
+                                    </Link>
+                                </DropdownMenuItem>
+                            );
+                        })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        }
+
+        // Items WITHOUT children → simple icon link with tooltip
+        const targetHref = item.href ?? "#";
         const isCollapsedActive =
             !!targetHref &&
             (pathname === targetHref ||
-                pathname.startsWith(targetHref + "/") ||
-                hasActiveChild);
+                pathname.startsWith(targetHref + "/"));
 
         return (
             <Tooltip>
@@ -220,7 +282,7 @@ export function AppSidebarContent({
 }: AppSidebarContentProps) {
     return (
         <TooltipProvider delayDuration={200}>
-            <div className="flex h-full flex-col bg-white">
+            <div className="flex min-h-screen flex-col bg-white">
                 {/* Brand Logo */}
                 <div
                     className={cn(
