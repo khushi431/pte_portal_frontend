@@ -3,40 +3,50 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, GraduationCap, Lock, Mail, Shield, BookOpen, Users, Building } from "lucide-react";
-import { ROLE_DASHBOARD, UserRole, ROLE_COOKIE } from "@/lib/routes";
+import { Eye, EyeOff, GraduationCap, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-
-const ROLES: { value: UserRole; label: string; icon: React.ElementType; description: string }[] = [
-    { value: "superAdmin", label: "Super Admin", icon: Shield, description: "Platform owner" },
-    { value: "admin", label: "Admin", icon: Users, description: "Institute admin" },
-    { value: "branchAdmin", label: "Branch Admin", icon: Building, description: "Branch manager" },
-    { value: "teacher", label: "Teacher", icon: BookOpen, description: "Educator" },
-    { value: "student", label: "Student", icon: GraduationCap, description: "Learner" },
-];
+import { getDashboardUrl } from "@/lib/routes";
 
 export default function LoginPage() {
     const router = useRouter();
-    const [role, setRole] = useState<UserRole>("student");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    function handleLogin(e: React.FormEvent) {
+    async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
         setError("");
         if (!email.trim()) { setError("Please enter your email."); return; }
         if (!password.trim()) { setError("Please enter your password."); return; }
+
         setLoading(true);
-        const expires = new Date(Date.now() + 86400_000).toUTCString();
-        document.cookie = `${ROLE_COOKIE}=${role}; path=/; expires=${expires}`;
-        router.push(ROLE_DASHBOARD[role]);
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Login failed");
+                return;
+            }
+
+            // Redirect based on role + tenant
+            const dashboard = getDashboardUrl(data.user.role, data.user.tenant_id);
+            router.push(dashboard);
+        } catch {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -45,48 +55,19 @@ export default function LoginPage() {
                 <CardHeader className="space-y-1 pb-6">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="size-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
-                            <span className="text-lg font-bold">P</span>
+                            <GraduationCap className="size-5 text-white" />
                         </div>
                         <div>
                             <CardTitle className="text-xl text-white">Welcome back</CardTitle>
-                            <CardDescription className="text-white/50 text-xs">Sign in to your PTE Portal account</CardDescription>
+                            <CardDescription className="text-white/50 text-xs">
+                                Sign in to your PTE Portal account
+                            </CardDescription>
                         </div>
                     </div>
                 </CardHeader>
 
                 <CardContent className="space-y-5">
-                    {/* Role Picker */}
-                    <div className="space-y-2">
-                        <Label className="text-xs font-medium text-white/60 uppercase tracking-wider">Sign in as</Label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {ROLES.map((r) => {
-                                const Icon = r.icon;
-                                const active = role === r.value;
-                                return (
-                                    <button
-                                        key={r.value}
-                                        type="button"
-                                        onClick={() => setRole(r.value)}
-                                        className={cn(
-                                            "flex items-center gap-2.5 p-3 rounded-lg border text-left transition-all duration-150",
-                                            active
-                                                ? "border-indigo-500 bg-indigo-500/15 text-white"
-                                                : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70"
-                                        )}
-                                    >
-                                        <Icon className={cn("size-4 shrink-0", active ? "text-indigo-400" : "text-white/30")} />
-                                        <div className="leading-tight">
-                                            <div className="text-xs font-semibold">{r.label}</div>
-                                            <div className="text-[10px] text-white/30">{r.description}</div>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
                     <form onSubmit={handleLogin} className="space-y-4">
-                        {/* Email */}
                         <div className="space-y-1.5">
                             <Label htmlFor="email" className="text-white/70 text-sm">Email</Label>
                             <div className="relative">
@@ -102,7 +83,6 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Password */}
                         <div className="space-y-1.5">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password" className="text-white/70 text-sm">Password</Label>
