@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/sheet";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AppTable, AppTableColumn } from "@/components/ui/app-table";
+import { ActionIconButton } from "@/components/ui/action-icon-button";
 import { PteModule, QuestionTypeInfo } from "../types";
 import { PTE_MODULES } from "../constants/modules";
 
@@ -105,6 +107,80 @@ export function QuestionTypeTable({ initialTypes }: QuestionTypeTableProps) {
         ...PTE_MODULES.map((m) => ({ id: m.id, label: m.label })),
     ];
 
+    const columns: AppTableColumn<QuestionTypeInfo>[] = [
+        {
+            id: "name",
+            header: "Course",
+            cell: (qt) => (
+                <div className="flex flex-col">
+                    <span className="font-semibold text-slate-900">{qt.label}</span>
+                    <span className="text-xs text-slate-400">slug: {qt.slug}</span>
+                </div>
+            ),
+        },
+        {
+            id: "module",
+            header: "Category",
+            thClassName: "hidden md:table-cell",
+            tdClassName: "hidden md:table-cell",
+            cell: (qt) => {
+                const moduleInfo = PTE_MODULES.find((m) => m.id === qt.module);
+                if (!moduleInfo) return null;
+                return (
+                    <span
+                        className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border",
+                            moduleInfo.bgColor,
+                            moduleInfo.color,
+                            moduleInfo.borderColor,
+                        )}
+                    >
+                        <span
+                            className={cn(
+                                "size-1.5 rounded-full",
+                                moduleInfo.color.replace("text-", "bg-"),
+                            )}
+                        />
+                        {moduleInfo.label}
+                    </span>
+                );
+            },
+        },
+        {
+            id: "description",
+            header: "Description",
+            thClassName: "hidden lg:table-cell",
+            tdClassName: "hidden lg:table-cell max-w-sm",
+            cell: (qt) => (
+                <span className="text-xs text-slate-500 line-clamp-2">
+                    {qt.description}
+                </span>
+            ),
+        },
+        {
+            id: "actions",
+            header: "Action",
+            thClassName: "text-right",
+            tdClassName: "text-right",
+            cell: (qt) => (
+                <div className="flex items-center justify-end gap-2">
+                    <ActionIconButton
+                        variant="edit"
+                        label="Edit"
+                        onClick={() => openEdit(qt)}
+                        icon={<Pencil className="size-4" />}
+                    />
+                    <ActionIconButton
+                        variant="delete"
+                        label="Delete"
+                        onClick={() => handleDelete(qt)}
+                        icon={<Trash2 className="size-4" />}
+                    />
+                </div>
+            ),
+        },
+    ];
+
     return (
         <div className="space-y-4">
             {/* Filters + Actions */}
@@ -136,100 +212,12 @@ export function QuestionTypeTable({ initialTypes }: QuestionTypeTableProps) {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/80">
-                            <th className="px-4 py-3 text-left font-semibold text-slate-600">
-                                Name
-                            </th>
-                            <th className="px-4 py-3 text-left font-semibold text-slate-600 hidden md:table-cell">
-                                Module
-                            </th>
-                            <th className="px-4 py-3 text-left font-semibold text-slate-600 hidden lg:table-cell">
-                                Description
-                            </th>
-                            <th className="px-4 py-3 text-right font-semibold text-slate-600">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {filtered.length === 0 && (
-                            <tr>
-                                <td
-                                    colSpan={4}
-                                    className="px-4 py-6 text-center text-sm text-slate-500"
-                                >
-                                    No question types found. Try changing filters or add a new type.
-                                </td>
-                            </tr>
-                        )}
-                        {filtered.map((qt) => {
-                            const moduleInfo = PTE_MODULES.find((m) => m.id === qt.module);
-                            return (
-                                <tr key={qt.slug} className="hover:bg-slate-50/50">
-                                    <td className="px-4 py-3">
-                                        <div className="flex flex-col">
-                                            <span className="font-medium text-slate-800">
-                                                {qt.label}
-                                            </span>
-                                            <span className="text-xs text-slate-400">
-                                                slug: {qt.slug}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 hidden md:table-cell">
-                                        {moduleInfo && (
-                                            <span
-                                                className={cn(
-                                                    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border",
-                                                    moduleInfo.bgColor,
-                                                    moduleInfo.color,
-                                                    moduleInfo.borderColor,
-                                                )}
-                                            >
-                                                <span
-                                                    className={cn(
-                                                        "size-1.5 rounded-full",
-                                                        moduleInfo.color.replace("text-", "bg-"),
-                                                    )}
-                                                />
-                                                {moduleInfo.label}
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3 hidden lg:table-cell max-w-sm">
-                                        <span className="text-xs text-slate-500 line-clamp-2">
-                                            {qt.description}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon-xs"
-                                                onClick={() => openEdit(qt)}
-                                                title="Edit"
-                                            >
-                                                <Pencil className="size-3.5 text-slate-500" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon-xs"
-                                                onClick={() => handleDelete(qt)}
-                                                title="Delete"
-                                            >
-                                                <Trash2 className="size-3.5 text-red-400" />
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+            <AppTable
+                data={filtered}
+                columns={columns}
+                getRowKey={(qt) => qt.slug}
+                emptyState="No question types found. Try changing filters or add a new type."
+            />
 
             {/* Create / Edit sheet (dummy, in-memory) */}
             <Sheet open={open} onOpenChange={setOpen}>

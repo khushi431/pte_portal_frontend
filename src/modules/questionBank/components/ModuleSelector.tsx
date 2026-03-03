@@ -16,39 +16,43 @@ interface ModuleSelectorProps {
     selectedModule: PteModule | "all";
     onModuleChange: (module: PteModule | "all") => void;
     questionCounts?: Record<string, number>;
+    showAll?: boolean;
 }
 
 export function ModuleSelector({
     selectedModule,
     onModuleChange,
     questionCounts,
+    showAll = true,
 }: ModuleSelectorProps) {
     return (
         <div className="flex flex-wrap gap-2">
-            {/* All tab */}
-            <button
-                onClick={() => onModuleChange("all")}
-                className={cn(
-                    "flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all border",
-                    selectedModule === "all"
-                        ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
-                )}
-            >
-                <span>All Modules</span>
-                {questionCounts && (
-                    <span
-                        className={cn(
-                            "rounded-full px-2 py-0.5 text-xs font-semibold",
-                            selectedModule === "all"
-                                ? "bg-white/20 text-white"
-                                : "bg-slate-100 text-slate-500"
-                        )}
-                    >
-                        {Object.values(questionCounts).reduce((a, b) => a + b, 0)}
-                    </span>
-                )}
-            </button>
+            {/* All tab (optional) */}
+            {showAll && (
+                <button
+                    onClick={() => onModuleChange("all")}
+                    className={cn(
+                        "flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all border",
+                        selectedModule === "all"
+                            ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                            : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                    )}
+                >
+                    <span>All Modules</span>
+                    {questionCounts && (
+                        <span
+                            className={cn(
+                                "rounded-full px-2 py-0.5 text-xs font-semibold",
+                                selectedModule === "all"
+                                    ? "bg-white/20 text-white"
+                                    : "bg-slate-100 text-slate-500"
+                            )}
+                        >
+                            {Object.values(questionCounts).reduce((a, b) => a + b, 0)}
+                        </span>
+                    )}
+                </button>
+            )}
 
             {/* Module tabs */}
             {PTE_MODULES.map((mod: PteModuleInfo) => {

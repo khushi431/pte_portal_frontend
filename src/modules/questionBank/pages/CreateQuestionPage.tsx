@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { ModuleSelector } from "../components/ModuleSelector";
@@ -12,6 +12,7 @@ import { MCQEditor } from "../editors/mcq/MCQEditor";
 import { FillBlanksEditor } from "../editors/fillBlanks/FillBlanksEditor";
 import { ReadingPassageEditor } from "../editors/reading/ReadingPassageEditor";
 import { PteModule, QuestionTypeSlug } from "../types";
+import { cn } from "@/lib/utils";
 
 interface CreateQuestionPageProps {
     basePath: string; // "/admin/questionBank" or "/superAdmin/questionBank"
@@ -20,6 +21,9 @@ interface CreateQuestionPageProps {
 export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
     const [selectedModule, setSelectedModule] = useState<PteModule | "all">("all");
     const [selectedType, setSelectedType] = useState<QuestionTypeSlug | null>(null);
+
+    const currentStep =
+        selectedModule === "all" ? 1 : !selectedType ? 2 : 3;
 
     return (
         <div className="space-y-6">
@@ -36,6 +40,93 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                 }
             />
 
+            {/* Top stepper */}
+            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-1 items-center gap-3 sm:gap-4">
+                        {[
+                            {
+                                id: 1,
+                                label: "Select module",
+                                description: "Choose the PTE module to create a question for.",
+                            },
+                            {
+                                id: 2,
+                                label: "Choose type",
+                                description: "Pick the question template",
+                            },
+                            {
+                                id: 3,
+                                label: "Write question",
+                                description: "Add passage, answers & difficulty",
+                            },
+                        ].map((step, index, arr) => {
+                            const status =
+                                currentStep > step.id
+                                    ? "done"
+                                    : currentStep === step.id
+                                        ? "current"
+                                        : "upcoming";
+
+                            return (
+                                <div key={step.id} className="flex flex-1 items-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className={cn(
+                                                "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors",
+                                                status === "done" &&
+                                                    "bg-purple-600 text-white shadow-sm",
+                                                status === "current" &&
+                                                    "bg-purple-50 text-purple-700 border border-purple-300",
+                                                status === "upcoming" &&
+                                                    "bg-slate-100 text-slate-500"
+                                            )}
+                                        >
+                                            {status === "done" ? (
+                                                <Check className="size-3.5" />
+                                            ) : (
+                                                step.id
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p
+                                                className={cn(
+                                                    "text-xs font-semibold",
+                                                    status === "upcoming"
+                                                        ? "text-slate-500"
+                                                        : "text-slate-900"
+                                                )}
+                                            >
+                                                {step.label}
+                                            </p>
+                                            <p className="text-[11px] text-slate-400 truncate">
+                                                {step.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {/* Tail connector */}
+                                    {index < arr.length - 1 && (
+                                        <div className="hidden flex-1 items-center sm:flex">
+                                            <div
+                                                className={cn(
+                                                    "h-[2px] w-full rounded-full",
+                                                    currentStep > step.id
+                                                        ? "bg-purple-500"
+                                                        : "bg-slate-200"
+                                                )}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="text-[11px] text-slate-400 whitespace-nowrap">
+                        Step {currentStep} of 3
+                    </div>
+                </div>
+            </div>
+
             {/* Step 1: Select Module */}
             <div className="space-y-3">
                 <h2 className="text-sm font-semibold text-slate-700">
@@ -47,7 +138,24 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                         setSelectedModule(mod);
                         setSelectedType(null);
                     }}
+                    showAll={false}
                 />
+                {selectedModule === "all" && (
+                    <div className="mt-6 flex items-center justify-center">
+                        <div className="w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50/90 px-8 py-12 text-center text-xs sm:text-sm text-slate-600">
+                            <p className="mb-3 text-sm font-semibold text-slate-700 sm:text-base">
+                                Select a module to start creating a question
+                            </p>
+                            <p className="mx-auto max-w-2xl text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+                                Choose <span className="font-semibold">Reading</span>,{" "}
+                                <span className="font-semibold">Speaking</span>,{" "}
+                                <span className="font-semibold">Writing</span> or{" "}
+                                <span className="font-semibold">Listening</span> above. We’ll then
+                                show you the relevant question types and editor for that module.
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Step 2: Select Question Type */}

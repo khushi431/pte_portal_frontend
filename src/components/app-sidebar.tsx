@@ -3,13 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronDown, LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface NavChild {
     label: string;
@@ -33,66 +39,150 @@ interface AppSidebarContentProps {
     brandIcon: string; // emoji or text
     navGroups: NavGroup[];
     onLinkClick?: () => void;
+    collapsed?: boolean;
 }
 
 function NavItemRow({
     item,
     onLinkClick,
+    collapsed,
 }: {
     item: NavItem;
     onLinkClick?: () => void;
+    collapsed?: boolean;
 }) {
     const pathname = usePathname();
     const Icon = item.icon;
     const hasChildren = item.children && item.children.length > 0;
 
-    const isActive = item.href
-        ? pathname === item.href || pathname.startsWith(item.href + "/")
-        : item.children?.some((c) => pathname.startsWith(c.href));
+    // Check if any child is active (exact match for submenu highlight)
+    const hasActiveChild =
+        item.children?.some((c) => pathname === c.href) ?? false;
 
-    const [open, setOpen] = useState(isActive ?? false);
+    // Check if parent item itself is active
+    const isParentActive = item.href
+        ? pathname === item.href || pathname.startsWith(item.href + "/")
+        : false;
+
+    // Item is active if it's the parent active OR has an active child
+    const isActive = isParentActive || hasActiveChild;
+
+    // Auto-open if has active child, allow manual toggle otherwise
+    const [open, setOpen] = useState(hasActiveChild);
+
+    // Compact icon-only mode for collapsed sidebar (desktop)
+    if (collapsed) {
+        const targetHref =
+            item.href ?? item.children?.[0]?.href ?? "#";
+        const isCollapsedActive =
+            !!targetHref &&
+            (pathname === targetHref ||
+                pathname.startsWith(targetHref + "/") ||
+                hasActiveChild);
+
+        return (
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Link
+                        href={targetHref}
+                        onClick={onLinkClick}
+                        className={cn(
+                            "flex items-center justify-center rounded-2xl p-3 my-1 transition-colors duration-200",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
+                            isCollapsedActive
+                                ? "bg-purple-600 text-white shadow-sm"
+                                : "text-slate-600 hover:bg-purple-50 hover:text-purple-700"
+                        )}
+                    >
+                        <Icon className="size-5" />
+                    </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs font-medium px-2.5 py-1.5">
+                    {item.label}
+                </TooltipContent>
+            </Tooltip>
+        );
+    }
 
     if (hasChildren) {
         return (
             <Collapsible open={open} onOpenChange={setOpen}>
                 <CollapsibleTrigger asChild>
                     <button
+                        type="button"
                         className={cn(
-                            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors group",
+                            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
                             isActive
-                                ? "bg-primary/8 text-primary"
-                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                ? "text-purple-600 hover:bg-purple-50"
+                                : "text-slate-700 hover:bg-purple-50 hover:text-purple-600"
                         )}
                     >
-                        <Icon className={cn("size-4 shrink-0", isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600")} />
-                        <span className="flex-1 text-left">{item.label}</span>
-                        <ChevronDown
+                        <Icon
                             className={cn(
-                                "size-3.5 text-slate-400 transition-transform duration-200",
-                                open && "rotate-180"
+                                "size-5 shrink-0 transition-colors duration-200",
+                                isActive ? "text-purple-600" : "text-slate-600 group-hover:text-purple-600"
                             )}
                         />
+                        <span className="flex-1 text-left">{item.label}</span>
+                        {open ? (
+                            <ChevronUp
+                                className={cn(
+                                    "size-4 shrink-0 transition-colors duration-200",
+                                    isActive
+                                        ? "text-purple-600"
+                                        : "text-slate-400 group-hover:text-purple-500",
+                                )}
+                            />
+                        ) : (
+                            <ChevronDown
+                                className={cn(
+                                    "size-4 shrink-0 transition-colors duration-200",
+                                    isActive
+                                        ? "text-purple-600"
+                                        : "text-slate-400 group-hover:text-purple-500",
+                                )}
+                            />
+                        )}
                     </button>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="ml-[2.35rem] mt-0.5 flex flex-col gap-0.5 border-l border-slate-200 pl-3">
-                    {item.children!.map((child) => {
-                        const childActive = pathname === child.href || pathname.startsWith(child.href + "/");
-                        return (
-                            <Link
-                                key={child.href}
-                                href={child.href}
-                                onClick={onLinkClick}
-                                className={cn(
-                                    "rounded-md px-2 py-1.5 text-sm transition-colors",
-                                    childActive
-                                        ? "font-semibold text-primary"
-                                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-                                )}
-                            >
-                                {child.label}
-                            </Link>
-                        );
-                    })}
+                <CollapsibleContent className="mt-1.5">
+                    <div className="relative ml-7 pl-4">
+                        {/* Vertical connector line for submenu */}
+                        <div className="absolute left-0 top-2 bottom-2 w-px bg-slate-200" />
+                        <div className="space-y-1">
+                            {item.children!.map((child) => {
+                                // Only highlight the exact active submenu item
+                                const childActive = pathname === child.href;
+                                return (
+                                    <div key={child.href} className="relative pl-4">
+                                        {/* Dot indicator sitting on the connector line (outside the pill) */}
+                                        <span
+                                            className={cn(
+                                                "absolute left-0 top-1/2 -translate-y-1/2 size-2 rounded-full border-2 transition-colors duration-200 bg-white",
+                                                childActive
+                                                    ? "border-purple-600"
+                                                    : "border-slate-300 group-hover:border-purple-400"
+                                            )}
+                                        />
+                                        <Link
+                                            href={child.href}
+                                            onClick={onLinkClick}
+                                            className={cn(
+                                                "group flex items-center rounded-xl pl-3 pr-4 py-2 text-sm transition-all duration-200",
+                                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
+                                                childActive
+                                                    ? "bg-purple-600 text-white shadow-sm hover:bg-purple-700"
+                                                    : "bg-white text-slate-600 hover:bg-purple-50 hover:text-purple-600"
+                                            )}
+                                        >
+                                            <span>{child.label}</span>
+                                        </Link>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </CollapsibleContent>
             </Collapsible>
         );
@@ -103,13 +193,19 @@ function NavItemRow({
             href={item.href!}
             onClick={onLinkClick}
             className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors group",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1",
                 isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    ? "bg-purple-600 text-white shadow-sm hover:bg-purple-700"
+                    : "text-slate-700 hover:bg-purple-50 hover:text-purple-600"
             )}
         >
-            <Icon className={cn("size-4 shrink-0", isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-600")} />
+            <Icon
+                className={cn(
+                    "size-5 shrink-0 transition-colors duration-200",
+                    isActive ? "text-white" : "text-slate-600 group-hover:text-purple-600"
+                )}
+            />
             <span>{item.label}</span>
         </Link>
     );
@@ -120,32 +216,66 @@ export function AppSidebarContent({
     brandIcon,
     navGroups,
     onLinkClick,
+    collapsed = false,
 }: AppSidebarContentProps) {
     return (
-        <div className="flex h-full flex-col bg-white">
-            {/* Brand */}
-            <div className="flex items-center gap-2.5 border-b border-slate-100 px-5 py-4">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold shadow-sm">
-                    {brandIcon}
-                </div>
-                <span className="text-base font-bold text-slate-800">{brandName}</span>
-            </div>
-
-            {/* Nav */}
-            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
-                {navGroups.map((group) => (
-                    <div key={group.groupLabel}>
-                        <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                            {group.groupLabel}
-                        </p>
-                        <div className="space-y-0.5">
-                            {group.items.map((item) => (
-                                <NavItemRow key={item.label} item={item} onLinkClick={onLinkClick} />
-                            ))}
+        <TooltipProvider delayDuration={200}>
+            <div className="flex h-full flex-col bg-white">
+                {/* Brand Logo */}
+                <div
+                    className={cn(
+                        "flex items-center gap-3 border-b border-slate-200 px-6 py-5",
+                        collapsed && "justify-center px-0"
+                    )}
+                >
+                    <div className="relative flex size-10 items-center justify-center">
+                        {/* Purple graphic background */}
+                        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 shadow-sm" />
+                        {/* Icon overlay */}
+                        <div className="relative z-10 flex items-center justify-center text-white text-lg font-bold">
+                            {brandIcon}
                         </div>
                     </div>
-                ))}
-            </nav>
-        </div>
+                    {!collapsed && (
+                        <div className="flex flex-col">
+                            <span className="text-base font-bold text-slate-900 leading-tight">
+                                {brandName.split(" ")[0]}
+                            </span>
+                            <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                                {brandName.split(" ").slice(1).join(" ") || "Portal"}
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Nav */}
+                <nav
+                    className={cn(
+                        "flex-1 overflow-y-auto py-5 px-4 space-y-6",
+                        collapsed && "px-2 space-y-4"
+                    )}
+                >
+                    {navGroups.map((group) => (
+                        <div key={group.groupLabel}>
+                            {!collapsed && (
+                                <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                    {group.groupLabel}
+                                </p>
+                            )}
+                            <div className={cn("space-y-1", collapsed && "space-y-2")}>
+                                {group.items.map((item) => (
+                                    <NavItemRow
+                                        key={item.label}
+                                        item={item}
+                                        onLinkClick={onLinkClick}
+                                        collapsed={collapsed}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </nav>
+            </div>
+        </TooltipProvider>
     );
 }

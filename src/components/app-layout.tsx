@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { AppSidebarContent, NavGroup } from "@/components/app-sidebar";
 import { AppHeader } from "@/components/app-header";
+import { cn } from "@/lib/utils";
 
 interface AppLayoutProps {
     children: React.ReactNode;
@@ -29,15 +30,33 @@ export function AppLayout({
     notificationCount = 18,
 }: AppLayoutProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    const handleMenuClick = () => {
+        // On small screens: open/close mobile drawer only
+        if (typeof window !== "undefined" && window.innerWidth < 1024) {
+            setMobileOpen((prev) => !prev);
+            return;
+        }
+
+        // On desktop: collapse / expand sidebar
+        setSidebarCollapsed((prev) => !prev);
+    };
 
     return (
         <div className="flex min-h-screen bg-slate-50">
             {/* Desktop Sidebar — hidden on mobile */}
-            <aside className="hidden lg:flex lg:flex-col lg:w-60 xl:w-64 shrink-0 border-r border-slate-200 bg-white shadow-sm">
+            <aside
+                className={cn(
+                    "hidden lg:flex lg:flex-col shrink-0 border-r border-slate-200 bg-white transition-[width] duration-200",
+                    sidebarCollapsed ? "lg:w-20" : "lg:w-64 xl:w-72"
+                )}
+            >
                 <AppSidebarContent
                     brandName={brandName}
                     brandIcon={brandIcon}
                     navGroups={navGroups}
+                    collapsed={sidebarCollapsed}
                 />
             </aside>
 
@@ -61,7 +80,7 @@ export function AppLayout({
                     userRole={userRole}
                     userInitials={userInitials}
                     notificationCount={notificationCount}
-                    onMenuClick={() => setMobileOpen(true)}
+                    onMenuClick={handleMenuClick}
                 />
                 <main className="flex-1 p-4 sm:p-6 overflow-auto">
                     {children}
