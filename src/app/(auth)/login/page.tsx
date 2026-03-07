@@ -54,7 +54,7 @@ export default function LoginPage() {
             <Card className="shadow-2xl border border-white/10 bg-white/5 backdrop-blur-xl text-white">
                 <CardHeader className="space-y-1 pb-6">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="size-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
+                        <div className="size-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
                             <GraduationCap className="size-5 text-white" />
                         </div>
                         <div>
@@ -78,7 +78,7 @@ export default function LoginPage() {
                                     placeholder="you@example.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-indigo-500 focus:ring-indigo-500/20"
+                                    className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-primary focus:ring-primary/20"
                                 />
                             </div>
                         </div>
@@ -86,7 +86,7 @@ export default function LoginPage() {
                         <div className="space-y-1.5">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password" className="text-white/70 text-sm">Password</Label>
-                                <Link href="/forgetPassword" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                                <Link href="/forgetPassword" className="text-xs text-primary hover:text-primary/80 transition-colors">
                                     Forgot password?
                                 </Link>
                             </div>
@@ -98,7 +98,7 @@ export default function LoginPage() {
                                     placeholder="Enter your password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-9 pr-9 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-indigo-500"
+                                    className="pl-9 pr-9 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-primary"
                                 />
                                 <button
                                     type="button"
@@ -117,9 +117,9 @@ export default function LoginPage() {
                         )}
 
                         <Button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold h-10 shadow-lg shadow-indigo-500/20 transition-all"
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold h-10 shadow-lg shadow-primary/30 transition-all"
                         >
                             {loading ? "Signing in…" : "Sign In"}
                         </Button>
@@ -127,7 +127,7 @@ export default function LoginPage() {
 
                     <p className="text-center text-xs text-white/30">
                         Don&apos;t have an account?{" "}
-                        <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                        <Link href="/register" className="text-primary hover:text-primary/80 font-medium transition-colors">
                             Create account
                         </Link>
                     </p>

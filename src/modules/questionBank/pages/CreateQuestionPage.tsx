@@ -79,9 +79,9 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                                             className={cn(
                                                 "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors",
                                                 status === "done" &&
-                                                    "bg-purple-600 text-white shadow-sm",
+                                                    "bg-primary text-primary-foreground shadow-sm",
                                                 status === "current" &&
-                                                    "bg-purple-50 text-purple-700 border border-purple-300",
+                                                    "bg-primary/10 text-primary border border-primary/40",
                                                 status === "upcoming" &&
                                                     "bg-slate-100 text-slate-500"
                                             )}
@@ -115,7 +115,7 @@ export function CreateQuestionPage({ basePath }: CreateQuestionPageProps) {
                                                 className={cn(
                                                     "h-[2px] w-full rounded-full",
                                                     currentStep > step.id
-                                                        ? "bg-purple-500"
+                                                        ? "bg-primary"
                                                         : "bg-slate-200"
                                                 )}
                                             />

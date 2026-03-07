@@ -10,6 +10,7 @@ import {
     Users,
     BookOpen,
     ListChecks,
+    ClipboardList,
 } from "lucide-react";
 
 const navGroups = [
@@ -49,6 +50,14 @@ const navGroups = [
                 icon: ListChecks,
                 children: [
                     { label: "All Types", href: "/questionTypes" },
+                ],
+            },
+            {
+                label: "Tests",
+                icon: ClipboardList,
+                children: [
+                    { label: "All Tests", href: "/tests" },
+                    { label: "Create Test", href: "/tests/create" },
                 ],
             },
         ],

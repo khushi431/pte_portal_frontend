@@ -42,6 +42,7 @@ const navGroups = [
                 icon: ClipboardList,
                 children: [
                     { label: "All Tests", href: "/admin/tests" },
+                    { label: "Create Test", href: "/admin/tests/create" },
                 ],
             },
         ],

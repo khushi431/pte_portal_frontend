@@ -91,10 +91,10 @@ function NavItemRow({
                             aria-label={item.label}
                             className={cn(
                                 "flex items-center justify-center rounded-2xl p-3 my-1 w-full transition-colors duration-200",
-                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
+                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
                                 isActive
-                                    ? "bg-purple-600 text-white shadow-sm"
-                                    : "text-slate-600 hover:bg-purple-50 hover:text-purple-700"
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "text-slate-600 hover:bg-primary/10 hover:text-primary"
                             )}
                         >
                             <Icon className="size-5" />
@@ -150,10 +150,10 @@ function NavItemRow({
                         onClick={onLinkClick}
                         className={cn(
                             "flex items-center justify-center rounded-2xl p-3 my-1 transition-colors duration-200",
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
                             isCollapsedActive
-                                ? "bg-purple-600 text-white shadow-sm"
-                                : "text-slate-600 hover:bg-purple-50 hover:text-purple-700"
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-slate-600 hover:bg-primary/10 hover:text-primary"
                         )}
                     >
                         <Icon className="size-5" />
@@ -174,16 +174,16 @@ function NavItemRow({
                         type="button"
                         className={cn(
                             "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group",
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
                             isActive
-                                ? "text-purple-600 hover:bg-purple-50"
-                                : "text-slate-700 hover:bg-purple-50 hover:text-purple-600"
+                                ? "text-primary hover:bg-primary/10"
+                                : "text-slate-700 hover:bg-primary/5 hover:text-primary"
                         )}
                     >
                         <Icon
                             className={cn(
                                 "size-5 shrink-0 transition-colors duration-200",
-                                isActive ? "text-purple-600" : "text-slate-600 group-hover:text-purple-600"
+                                isActive ? "text-primary" : "text-slate-600 group-hover:text-primary"
                             )}
                         />
                         <span className="flex-1 text-left">{item.label}</span>
@@ -192,8 +192,8 @@ function NavItemRow({
                                 className={cn(
                                     "size-4 shrink-0 transition-colors duration-200",
                                     isActive
-                                        ? "text-purple-600"
-                                        : "text-slate-400 group-hover:text-purple-500",
+                                        ? "text-primary"
+                                        : "text-slate-400 group-hover:text-primary/80",
                                 )}
                             />
                         ) : (
@@ -201,8 +201,8 @@ function NavItemRow({
                                 className={cn(
                                     "size-4 shrink-0 transition-colors duration-200",
                                     isActive
-                                        ? "text-purple-600"
-                                        : "text-slate-400 group-hover:text-purple-500",
+                                        ? "text-primary"
+                                        : "text-slate-400 group-hover:text-primary/80",
                                 )}
                             />
                         )}
@@ -223,8 +223,8 @@ function NavItemRow({
                                             className={cn(
                                                 "absolute left-0 top-1/2 -translate-y-1/2 size-2 rounded-full border-2 transition-colors duration-200 bg-white",
                                                 childActive
-                                                    ? "border-purple-600"
-                                                    : "border-slate-300 group-hover:border-purple-400"
+                                                    ? "border-primary"
+                                                    : "border-slate-300 group-hover:border-primary/70"
                                             )}
                                         />
                                         <Link
@@ -232,10 +232,10 @@ function NavItemRow({
                                             onClick={onLinkClick}
                                             className={cn(
                                                 "group flex items-center rounded-xl pl-3 pr-4 py-2 text-sm transition-all duration-200",
-                                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-1",
+                                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
                                                 childActive
-                                                    ? "bg-purple-600 text-white shadow-sm hover:bg-purple-700"
-                                                    : "bg-white text-slate-600 hover:bg-purple-50 hover:text-purple-600"
+                                                    ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                                                    : "bg-white text-slate-600 hover:bg-primary/5 hover:text-primary"
                                             )}
                                         >
                                             <span>{child.label}</span>
@@ -256,16 +256,16 @@ function NavItemRow({
             onClick={onLinkClick}
             className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
                 isActive
-                    ? "bg-purple-600 text-white shadow-sm hover:bg-purple-700"
-                    : "text-slate-700 hover:bg-purple-50 hover:text-purple-600"
+                    ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                    : "text-slate-700 hover:bg-primary/5 hover:text-primary"
             )}
         >
             <Icon
                 className={cn(
                     "size-5 shrink-0 transition-colors duration-200",
-                    isActive ? "text-white" : "text-slate-600 group-hover:text-purple-600"
+                    isActive ? "text-primary-foreground" : "text-slate-600 group-hover:text-primary"
                 )}
             />
             <span>{item.label}</span>
@@ -291,8 +291,8 @@ export function AppSidebarContent({
                     )}
                 >
                     <div className="relative flex size-10 items-center justify-center">
-                        {/* Purple graphic background */}
-                        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 shadow-sm" />
+                        {/* Brand graphic background tied to primary */}
+                        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-sm" />
                         {/* Icon overlay */}
                         <div className="relative z-10 flex items-center justify-center text-white text-lg font-bold">
                             {brandIcon}

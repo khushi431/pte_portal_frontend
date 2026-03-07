@@ -43,7 +43,7 @@ export function AppTable<T>({
                 <thead>
                     <tr
                         className={cn(
-                            "bg-purple-600 text-white",
+                            "bg-primary text-primary-foreground",
                             headerRowClassName
                         )}
                     >
@@ -77,8 +77,8 @@ export function AppTable<T>({
                                 key={getRowKey(row, idx)}
                                 className={cn(
                                     "transition-colors",
-                                    idx % 2 === 0 ? "bg-white" : "bg-purple-50",
-                                    "hover:bg-purple-50/70",
+                                    idx % 2 === 0 ? "bg-white" : "bg-primary/5",
+                                    "hover:bg-primary/10",
                                     rowClassName?.(row, idx)
                                 )}
                             >

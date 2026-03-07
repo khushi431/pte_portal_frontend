@@ -52,7 +52,8 @@ export function QuestionFilters({
             <select
                 value={difficulty}
                 onChange={(e) => onDifficultyChange(e.target.value as Difficulty | "all")}
-                className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
+                className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-primary focus:ring-primary/30 focus:ring-[3px]"
+                aria-label="Filter by difficulty"
             >
                 {DIFFICULTY_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -69,7 +70,8 @@ export function QuestionFilters({
                         e.target.value as "active" | "draft" | "archived" | "all"
                     )
                 }
-                className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
+                className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-primary focus:ring-primary/30 focus:ring-[3px]"
+                aria-label="Filter by status"
             >
                 {STATUS_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
