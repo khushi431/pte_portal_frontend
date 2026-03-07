@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/page-header";
 import { TestFilters } from "../components/TestFilters";
 import { TestGridView } from "../components/TestGridView";
 import { TestListView } from "../components/TestListView";
+import { TestViewModal } from "../components/TestViewModal";
 import { DUMMY_TESTS } from "../data/dummyTests";
 import { Test, TestStatus } from "../types";
 import { PteModule } from "@/modules/questionBank/types";
@@ -159,27 +160,12 @@ export function TestListPage({ basePath }: TestListPageProps) {
                 </div>
             </div>
 
-            {/* Preview Panel - can be added later */}
-            {previewTest && (
-                <>
-                    <div
-                        className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
-                        onClick={() => setPreviewTest(null)}
-                    />
-                    <div className="fixed right-0 top-0 z-50 h-full w-full max-w-2xl bg-white shadow-xl">
-                        <div className="p-6">
-                            <h2 className="text-xl font-bold mb-4">{previewTest.title}</h2>
-                            <p className="text-sm text-slate-600 mb-4">{previewTest.description}</p>
-                            <button
-                                onClick={() => setPreviewTest(null)}
-                                className="text-sm text-primary hover:underline"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </>
-            )}
+            {/* Test View Modal */}
+            <TestViewModal
+                test={previewTest}
+                open={!!previewTest}
+                onOpenChange={(open) => !open && setPreviewTest(null)}
+            />
         </div>
     );
 }

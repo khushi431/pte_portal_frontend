@@ -1,8 +1,9 @@
 "use client";
 
+import * as React from "react";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, X, Search, Filter, Clock, FileQuestion, Award, Save, Eye } from "lucide-react";
+import { ArrowLeft, Plus, X, Clock, FileQuestion, Award, Save, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/page-header";
 import { DraggableModal } from "@/components/ui/draggable-modal";
+import { QuestionPreview } from "../components/QuestionPreview";
+import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import { DUMMY_QUESTIONS } from "@/modules/questionBank/data/dummyQuestions";
 import { Question, PteModule, Difficulty } from "@/modules/questionBank/types";
@@ -27,6 +32,95 @@ interface SelectedQuestion {
     question: Question;
     points: number;
     order: number;
+}
+
+function SortableQuestionItem({
+    sq,
+    onRemove,
+    onUpdatePoints,
+}: {
+    sq: SelectedQuestion;
+    onRemove: (questionId: string) => void;
+    onUpdatePoints: (questionId: string, points: number) => void;
+}) {
+    const moduleInfo = PTE_MODULES.find((m) => m.id === sq.question.module);
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: sq.questionId });
+
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={cn(
+                "flex items-start gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors",
+                isDragging && "ring-2 ring-primary/40 bg-primary/5 z-50"
+            )}
+        >
+            <button
+                type="button"
+                className="mt-1 cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 shrink-0"
+                {...attributes}
+                {...listeners}
+                aria-label="Drag to reorder"
+            >
+                <GripVertical className="size-4" />
+            </button>
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-semibold shrink-0">
+                {sq.order}
+            </div>
+            <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-slate-900 text-sm mb-1">
+                            {sq.question.title}
+                        </h4>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {moduleInfo && (
+                                <Badge variant="outline" className="text-xs">
+                                    {moduleInfo.label}
+                                </Badge>
+                            )}
+                            <Badge variant="secondary" className="text-xs capitalize">
+                                {sq.question.difficulty}
+                            </Badge>
+                            <span className="text-xs text-slate-500">
+                                {sq.question.questionTypeLabel}
+                            </span>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => onRemove(sq.questionId)}
+                        className="text-slate-400 hover:text-red-500 transition-colors shrink-0"
+                        aria-label="Remove question"
+                    >
+                        <X className="size-4" />
+                    </button>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Label className="text-xs text-slate-600">Points:</Label>
+                    <Input
+                        type="number"
+                        min="1"
+                        value={sq.points}
+                        onChange={(e) => onUpdatePoints(sq.questionId, Number(e.target.value) || 1)}
+                        className="h-7 w-20 text-sm"
+                    />
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export function CreateTestPage({ basePath }: CreateTestPageProps) {
@@ -124,10 +218,16 @@ export function CreateTestPage({ basePath }: CreateTestPageProps) {
         );
     };
 
-    const handleReorder = (fromIndex: number, toIndex: number) => {
-        const newQuestions = [...selectedQuestions];
-        const [moved] = newQuestions.splice(fromIndex, 1);
-        newQuestions.splice(toIndex, 0, moved);
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = selectedQuestions.findIndex((sq) => sq.questionId === active.id);
+        const newIndex = selectedQuestions.findIndex((sq) => sq.questionId === over.id);
+
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        const newQuestions = arrayMove(selectedQuestions, oldIndex, newIndex);
         setSelectedQuestions(newQuestions.map((sq, idx) => ({ ...sq, order: idx + 1 })));
     };
 
@@ -258,66 +358,37 @@ export function CreateTestPage({ basePath }: CreateTestPageProps) {
                                 </Button>
                             </div>
                         ) : (
-                            <div className="space-y-3">
-                                {selectedQuestions.map((sq, index) => {
-                                    const moduleInfo = PTE_MODULES.find((m) => m.id === sq.question.module);
-                                    return (
-                                        <div
-                                            key={sq.questionId}
-                                            className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors"
-                                        >
-                                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-semibold shrink-0">
-                                                {sq.order}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between gap-2 mb-2">
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="font-medium text-slate-900 text-sm mb-1">
-                                                            {sq.question.title}
-                                                        </h4>
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            {moduleInfo && (
-                                                                <Badge variant="outline" className="text-xs">
-                                                                    {moduleInfo.label}
-                                                                </Badge>
-                                                            )}
-                                                            <Badge
-                                                                variant="secondary"
-                                                                className="text-xs capitalize"
-                                                            >
-                                                                {sq.question.difficulty}
-                                                            </Badge>
-                                                            <span className="text-xs text-slate-500">
-                                                                {sq.question.questionTypeLabel}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveQuestion(sq.questionId)}
-                                                        className="text-slate-400 hover:text-red-500 transition-colors shrink-0"
-                                                        aria-label="Remove question"
-                                                    >
-                                                        <X className="size-4" />
-                                                    </button>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <Label className="text-xs text-slate-600">Points:</Label>
-                                                    <Input
-                                                        type="number"
-                                                        min="1"
-                                                        value={sq.points}
-                                                        onChange={(e) =>
-                                                            handleUpdatePoints(sq.questionId, Number(e.target.value) || 1)
-                                                        }
-                                                        className="h-7 w-20 text-sm"
+                            <>
+                                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                    <SortableContext
+                                        items={selectedQuestions.map((sq) => sq.questionId)}
+                                        strategy={verticalListSortingStrategy}
+                                    >
+                                        <div className="space-y-3">
+                                            {selectedQuestions.map((sq) => {
+                                                return (
+                                                    <SortableQuestionItem
+                                                        key={sq.questionId}
+                                                        sq={sq}
+                                                        onRemove={handleRemoveQuestion}
+                                                        onUpdatePoints={handleUpdatePoints}
                                                     />
-                                                </div>
-                                            </div>
+                                                );
+                                            })}
                                         </div>
-                                    );
-                                })}
-                            </div>
+                                    </SortableContext>
+                                </DndContext>
+                                <div className="mt-4 flex justify-center">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setShowQuestionSelector(true)}
+                                    >
+                                        <Plus className="size-4" />
+                                        Add More Questions
+                                    </Button>
+                                </div>
+                            </>
                         )}
                     </Card>
 
@@ -327,102 +398,118 @@ export function CreateTestPage({ basePath }: CreateTestPageProps) {
                         onOpenChange={setShowQuestionSelector}
                         title="Select Questions"
                         description="Choose questions from your question bank to add to this test"
-                        size="xl"
+                        size="2xl"
                         maxHeight="max-h-[85vh]"
                     >
-                        <div className="space-y-4">
-                            {/* Filters */}
-                            <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
-                                <div className="flex-1">
-                                    <Input
-                                        placeholder="Search questions..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="h-9"
-                                    />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Left: Questions List */}
+                            <div className="space-y-4">
+                                {/* Filters */}
+                                <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
+                                    <div className="flex-1">
+                                        <Input
+                                            placeholder="Search questions..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="h-9"
+                                        />
+                                    </div>
+                                    <select
+                                        value={moduleFilter}
+                                        onChange={(e) => setModuleFilter(e.target.value as PteModule | "all")}
+                                        className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
+                                        aria-label="Filter by module"
+                                    >
+                                        <option value="all">All Modules</option>
+                                        {PTE_MODULES.map((mod) => (
+                                            <option key={mod.id} value={mod.id}>
+                                                {mod.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        value={difficultyFilter}
+                                        onChange={(e) => setDifficultyFilter(e.target.value as Difficulty | "all")}
+                                        className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
+                                        aria-label="Filter by difficulty"
+                                    >
+                                        <option value="all">All Difficulties</option>
+                                        <option value="easy">Easy</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="hard">Hard</option>
+                                    </select>
                                 </div>
-                                <select
-                                    value={moduleFilter}
-                                    onChange={(e) => setModuleFilter(e.target.value as PteModule | "all")}
-                                    className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
-                                    aria-label="Filter by module"
-                                >
-                                    <option value="all">All Modules</option>
-                                    {PTE_MODULES.map((mod) => (
-                                        <option key={mod.id} value={mod.id}>
-                                            {mod.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                <select
-                                    value={difficultyFilter}
-                                    onChange={(e) => setDifficultyFilter(e.target.value as Difficulty | "all")}
-                                    className="h-9 rounded-md border border-input bg-transparent px-3 text-sm text-slate-700 outline-none focus:border-ring focus:ring-ring/50 focus:ring-[3px]"
-                                    aria-label="Filter by difficulty"
-                                >
-                                    <option value="all">All Difficulties</option>
-                                    <option value="easy">Easy</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="hard">Hard</option>
-                                </select>
+
+                                {/* Questions List */}
+                                <div className="max-h-[60vh] overflow-y-auto space-y-3">
+                                    {availableQuestions.length === 0 ? (
+                                        <div className="text-center py-12">
+                                            <FileQuestion className="size-12 text-slate-300 mx-auto mb-3" />
+                                            <p className="text-sm text-slate-500">No questions available</p>
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                Try adjusting your filters or add more questions to your question bank
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        availableQuestions.map((question) => {
+                                            const moduleInfo = PTE_MODULES.find((m) => m.id === question.module);
+                                            const isAlreadyAdded = selectedQuestions.some((sq) => sq.questionId === question.id);
+                                            return (
+                                                <div
+                                                    key={question.id}
+                                                    className={cn(
+                                                        "flex items-start gap-4 p-4 rounded-lg border transition-colors",
+                                                        isAlreadyAdded
+                                                            ? "border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed"
+                                                            : "border-slate-200 hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                                                    )}
+                                                >
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-medium text-slate-900 text-sm mb-1">
+                                                            {question.title}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                                                            {moduleInfo && (
+                                                                <Badge variant="outline" className="text-xs">
+                                                                    {moduleInfo.label}
+                                                                </Badge>
+                                                            )}
+                                                            <Badge variant="secondary" className="text-xs capitalize">
+                                                                {question.difficulty}
+                                                            </Badge>
+                                                            <span className="text-xs text-slate-500">
+                                                                {question.questionTypeLabel}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-xs text-slate-600 line-clamp-2">
+                                                            {question.content}
+                                                        </p>
+                                                    </div>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (!isAlreadyAdded) {
+                                                                handleAddQuestion(question);
+                                                            }
+                                                        }}
+                                                        disabled={isAlreadyAdded}
+                                                        className="shrink-0"
+                                                    >
+                                                        <Plus className="size-4" />
+                                                        {isAlreadyAdded ? "Added" : "Add"}
+                                                    </Button>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
                             </div>
 
-                            {/* Questions List */}
-                            {availableQuestions.length === 0 ? (
-                                <div className="text-center py-12">
-                                    <FileQuestion className="size-12 text-slate-300 mx-auto mb-3" />
-                                    <p className="text-sm text-slate-500">No questions available</p>
-                                    <p className="text-xs text-slate-400 mt-1">
-                                        Try adjusting your filters or add more questions to your question bank
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    {availableQuestions.map((question) => {
-                                        const moduleInfo = PTE_MODULES.find((m) => m.id === question.module);
-                                        return (
-                                            <div
-                                                key={question.id}
-                                                className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                                            >
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-medium text-slate-900 text-sm mb-1">
-                                                        {question.title}
-                                                    </h4>
-                                                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                                                        {moduleInfo && (
-                                                            <Badge variant="outline" className="text-xs">
-                                                                {moduleInfo.label}
-                                                            </Badge>
-                                                        )}
-                                                        <Badge variant="secondary" className="text-xs capitalize">
-                                                            {question.difficulty}
-                                                        </Badge>
-                                                        <span className="text-xs text-slate-500">
-                                                            {question.questionTypeLabel}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-xs text-slate-600 line-clamp-2">
-                                                        {question.content}
-                                                    </p>
-                                                </div>
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        handleAddQuestion(question);
-                                                        // Optionally close modal after adding
-                                                        // setShowQuestionSelector(false);
-                                                    }}
-                                                    className="shrink-0"
-                                                >
-                                                    <Plus className="size-4" />
-                                                    Add
-                                                </Button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                            {/* Right: Preview */}
+                            <div className="lg:border-l lg:border-slate-200 lg:pl-6">
+                                <QuestionPreview selectedQuestions={selectedQuestions} />
+                            </div>
                         </div>
                     </DraggableModal>
                 </div>
